@@ -51,7 +51,61 @@
   </DefaultLayout>
 
   <DefaultLayout>
-    {{ this.result }}
+    <table
+      v-if="this.output.length === 10"
+      class="min-w-full divide-y divide-gray-200"
+    >
+      <thead class="bg-gray-50">
+        <tr>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            Rank
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            Song
+          </th>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            Artist
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr v-for="i in this.output" :key="i.rank" >
+          <td class="px-6 py-4 whitespace-nowrap">{{ i.rank }}</td>
+          <td>{{ i.song }}</td>
+          <td>{{ i.artist }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table
+      v-else-if="this.output.length !== 10"
+      class="min-w-full divide-y divide-gray-200"
+    >
+      <thead class="bg-gray-50">
+        <tr>
+          <th
+            scope="col"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            Topic
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr v-for="i in this.output" :key="i">
+          <td class="px-6 py-4 whitespace-nowrap">{{ i }}</td>
+        </tr>
+      </tbody>
+    </table>
     
   </DefaultLayout>
 </template>
@@ -79,18 +133,29 @@ export default {
       schema,
       ranking: "",
       result: "",
+      output: [], 
     };
   },
   methods: {
     handleLogin(user) {
+      this.output = []
+      this.result = ""
       this.ranking = user;
-      console.log(this.ranking);
-      console.log(this.ranking.query);
-      console.log(this.ranking.score);
       search.searchSong(this.ranking).then((res) => {
         this.result = res.data;
-        console.log(this.result);
-        this.result = JSON.parse(this.result);
+        if (this.result.length === 10) {
+          for (let i = 0; i < this.result.length; i++) {
+            this.output.push(JSON.parse(this.result[i]));
+          }
+        } else {
+          for (let i = 0; i < this.result.length; i++) {
+            if(this.result[i].length > 100){
+              this.output.push(JSON.parse(this.result[i]));
+            }else{
+              this.output.push(this.result[i]);
+            }
+          }
+        }
       });
     },
   },
