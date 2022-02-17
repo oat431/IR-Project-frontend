@@ -149,9 +149,9 @@ export default {
           }
         } else {
           for (let i = 0; i < this.result.length; i++) {
-            if(this.result[i].length > 100){
+            if (this.result[i].length > 100) {
               this.output.push(JSON.parse(this.result[i]));
-            }else{
+            } else {
               this.output.push(this.result[i]);
             }
           }
