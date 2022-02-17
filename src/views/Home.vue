@@ -1,18 +1,98 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
-  </div>
+  <DefaultLayout>
+    <section
+      class="max-w-4xl p-6 mx-auto bg-white rounded-md shadow-md dark:bg-gray-800"
+    >
+      <h2
+        class="text-lg font-semibold text-gray-700 capitalize dark:text-white"
+      >
+        Account settings
+      </h2>
+
+      <Form @submit="handleLogin" :validation-schema="schema">
+        <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
+          <div>
+            <label class="text-gray-700 dark:text-gray-200" for="query"
+              >Query</label
+            >
+            <Field
+              name="query"
+              type="text"
+              class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring"
+            />
+            <ErrorMessage name="query" class="text-red-500" />
+          </div>
+          <div></div>
+          <div>
+            <label class="text-gray-700 dark:text-gray-200" for="score"
+              >Search BY</label
+            >
+            <Field
+              name="score"
+              as="select"
+              :v-slot="{ score }"
+              class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring"
+            >
+              <option value="tf-idf">basic search</option>
+              <option value="bm25">advance search</option>
+            </Field>
+            <ErrorMessage name="score" class="text-red-500" />
+          </div>
+        </div>
+        <div class="flex justify-center mt-6">
+          <button
+            class="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:bg-green-600"
+          >
+            search
+          </button>
+        </div>
+      </Form>
+    </section>
+  </DefaultLayout>
+
+  <DefaultLayout>
+    {{ this.result }}
+    
+  </DefaultLayout>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from "@/components/HelloWorld.vue";
-
+import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import { Form, Field, ErrorMessage } from "vee-validate";
+import search from "@/service/search.js";
+import * as yup from "yup";
 export default {
-  name: "Home",
+  name: "Login",
+  inject: ["GlobalState"],
   components: {
-    HelloWorld,
+    DefaultLayout,
+    Form,
+    Field,
+    ErrorMessage,
+  },
+  data() {
+    const schema = yup.object().shape({
+      query: yup.string().required("Query is required!"),
+      score: yup.string().required("Please Select you score"),
+    });
+    return {
+      schema,
+      ranking: "",
+      result: "",
+    };
+  },
+  methods: {
+    handleLogin(user) {
+      this.ranking = user;
+      console.log(this.ranking);
+      console.log(this.ranking.query);
+      console.log(this.ranking.score);
+      search.searchSong(this.ranking).then((res) => {
+        this.result = res.data;
+        console.log(this.result);
+        this.result = JSON.parse(this.result);
+      });
+    },
   },
 };
 </script>
