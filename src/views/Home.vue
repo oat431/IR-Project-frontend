@@ -6,11 +6,19 @@
       <h2
         class="text-lg font-semibold text-gray-700 capitalize dark:text-white"
       >
-        Account settings
+        Search Bar
       </h2>
 
+      <h3 v-if="this.badword" class="text-red-500">
+        Some profane langue is in the query
+      </h3>
+
+      <h3 v-if="this.sugesstion.length !== 0" class="text-green-500">
+        <p v-for="i in this.sugesstion" :key="i.reason">{{ i.reason }}</p>
+      </h3>
+
       <Form @submit="handleLogin" :validation-schema="schema">
-        <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-1">
           <div>
             <label class="text-gray-700 dark:text-gray-200" for="query"
               >Query</label
@@ -96,13 +104,13 @@
             scope="col"
             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
           >
-            Topic
+            Result
           </th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         <tr v-for="i in this.output" :key="i">
-          <td class="px-6 py-4 whitespace-nowrap">{{ i }}</td>
+          <td class="px-6 py-4 whitespace-wrap">{{ i }}</td>
         </tr>
       </tbody>
     </table>
@@ -133,14 +141,29 @@ export default {
       schema,
       ranking: "",
       result: "",
-      output: [], 
+      output: [],
+      badword: false,
+      sugesstion: [],
     };
   },
   methods: {
+    checkBadWord(word) {
+      var Filter = require("bad-words");
+      let filter = new Filter();
+      this.badword = filter.isProfane(word);
+    },
+    querysugesstion(sentence) {
+      this.sugesstion = [];
+      var writeGood = require('write-good');
+      this.sugesstion = writeGood(sentence);
+      console.log(this.sugesstion);
+    },
     handleLogin(user) {
-      this.output = []
-      this.result = ""
+      this.output = [];
+      this.result = "";
       this.ranking = user;
+      this.checkBadWord(user.query);
+      this.querysugesstion(user.query);
       search.searchSong(this.ranking).then((res) => {
         this.result = res.data;
         if (this.result.length === 10) {
